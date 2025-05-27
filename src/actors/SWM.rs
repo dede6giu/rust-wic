@@ -1,3 +1,6 @@
+use std::sync::mpsc;
+use std::collections::HashSet;
+
 struct ActorSWM {
     receiver: mpsc::Receiver<MessageSWM>,
     handle_wcc: ActorWCC,
@@ -8,8 +11,14 @@ enum MessageSWM {
     Init {
         ref_wcm: ActorWCM,
     },
-    Filter { sentence: String },
-    Done, // Depois vemos
+
+    Filter { 
+        sentence: String, 
+    },
+
+    ProcessDone {
+        author: ActorWCC,
+    },
 }
 
 impl ActorSWM {
@@ -23,12 +32,18 @@ impl ActorSWM {
             HashSet<String>::new(),
         }
     }
+
     fn message_handle(&mut self, msg: MessageSWM) {
         match msg {
-            MessageSWM::Init { ref_wcm, STOP_WORDS_FILE } => {
-                // Lógica para criar o hashmap a partir do arquivo
-            }
+            // ===== INIT =====
+            // - Salva parâmetro handle_wcm dentro do struct para uso
+            // - Abre o arquivo STOP_WORDS_FILE e salva cada palavra (em minúsculo) em stop_words
+            MessageSWM::Init { ref_wcm, STOP_WORDS_FILE } => {}
+
+            // ===== FILTER =====
+            // - Recebe
             MessageSWM::Filter { sentence } => {
+                // Implementação exemplo
                 let words: Vec<&str> = sentence.split_whitespace().collect();
                 for word in words {
                     let word_lower = word.to_lowercase();
@@ -40,9 +55,13 @@ impl ActorSWM {
                     }
                 }
             }
-            MessageSWM::Done => {
-                self.handle_wcc.send(MessageWCC::Done).unwrap();
-            }
+
+            // ==== PROCESSDONE =====
+            // - Apenas transmite REQUESTWICMAP para WCM
+            MessageSWM::ProcessDone { author } => {}
+
+            // Mensagem não identificada
+            _ => {}
         }
     }
 }
