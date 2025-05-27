@@ -31,14 +31,14 @@ impl ActorWCC {
 
     fn message_handle(&mut self, msg: MessageWCC) {
         match msg {
-            // ===== RUNWIC =====
+            // ===== RunWIC =====
             // - Inicia o processo do Word In Context
             // - Salva referência para DSM para uso interno
             // - (opcionalmente) Requisita configurações extras 
-            // - Envia PROCESSKEYS para DSM
+            // - Envia ProcessKeys para DSM
             MessageWCC::RunWIC { ref_dsm } => {},
 
-            // ===== RUNWIC =====
+            // ===== Display =====
             // - Ordena data_map duplamente alfabeticamente
             // - Usa data_map para apresentar cada keyword
             //     - Usa cada keyword para apresentar todas suas 

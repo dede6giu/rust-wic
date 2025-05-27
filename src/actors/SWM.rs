@@ -37,13 +37,14 @@ impl ActorSWM {
 
     fn message_handle(&mut self, msg: MessageSWM) {
         match msg {
-            // ===== INIT =====
+            // ===== Init =====
             // - Salva parâmetro handle_wcm dentro do struct para uso
             // - Abre o arquivo STOP_WORDS_FILE e salva cada palavra (em minúsculo) em stop_words
             MessageSWM::Init { ref_wcm, STOP_WORDS_FILE } => {}
 
-            // ===== FILTER =====
-            // - Recebe
+            // ===== Filter =====
+            // - Recebe uma frase e envia todas as possibilidades para
+            //   WCM via KeywordEntry, EXCETO se estiver em stop_words
             MessageSWM::Filter { sentence } => {
                 // Implementação exemplo
                 let words: Vec<&str> = sentence.split_whitespace().collect();
@@ -58,11 +59,11 @@ impl ActorSWM {
                 }
             }
 
-            // ==== PROCESSDONE =====
-            // - Apenas transmite REQUESTWICMAP para WCM
+            // ==== ProcessDone =====
+            // - Apenas transmite RequestWICMap para WCM
             MessageSWM::ProcessDone { author } => {}
 
-            // ===== PING =====
+            // ===== Ping =====
             // - Verifica funcionalidade do Ator
             MessageSWM::Ping => {},
 

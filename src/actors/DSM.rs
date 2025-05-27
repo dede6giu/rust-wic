@@ -34,11 +34,11 @@ impl ActorDSM {
         match msg {
             // ===== INIT =====
             // - Salva parâmetro ref_swm dentro do struct para uso
-            // - Abre o arquivo path_file_input e salva na interidade como string em data_raw
+            // - Abre o arquivo FILE_INPUT_PATH e salva na interidade como string em data_raw
             // - Separa data_raw em frases, salve em sentences
-            MessageDSM::Init { ref_swm, path_file_input } => {
+            MessageDSM::Init { ref_swm, FILE_INPUT_PATH } => {
                 // Implementação exemplo
-                let content = fs::read_to_string(path_file_input).unwrap();
+                let content = fs::read_to_string(FILE_INPUT_PATH).unwrap();
                 let sentences: Vec<&str> = content.split('.').collect();
                 for sentence in sentences {
                     ref_swm.send(MessageSWM::Filter {
@@ -48,10 +48,10 @@ impl ActorDSM {
                 ref_swm.send(MessageSWM::Done).unwrap();
             }
 
-            // ===== PROCESSKEYS =====
-            // - Envia cada frase individualmente para SWM pela mensagem FILTER
-            // - Envia PROCESSDONE para SWM quando atingir o término
-            MessageDSM::ProcessKeys { author: ActorWCC } => {},
+            // ===== ProcessKeys =====
+            // - Envia cada frase individualmente para SWM pela mensagem Filter
+            // - Envia ProcessDone para SWM quando atingir o término
+            MessageDSM::ProcessKeys { author } => {},
 
             // ===== PING =====
             // - Verifica funcionalidade do Ator

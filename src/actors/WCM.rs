@@ -31,18 +31,18 @@ impl ActorWCM {
 
     fn message_handle(&mut self, msg: ActorMessage) {
         match msg {
-            // ===== KEYWORD =====
+            // ===== KeywordEntry =====
             // - Recolhe palavras antes e depois de acordo com 
             //   o tamanho de size_context
             // - Adiciona item phrase na lista da chave keyword
             //     - keyword: [(og_phrase, ordered_phrase)]
-            MessageWCM::Keyword { keyword, phrase } => {},
+            MessageWCM::KeywordEntry { keyword, phrase } => {},
 
-            // ===== REQUESTWICMAP =====
-            // - Envia para author a mensagem DISPLAY
+            // ===== RequestWICMap =====
+            // - Envia para author a mensagem Display
             MessageWCM::RequestWICMap { author } => {}
 
-            // ===== PING =====
+            // ===== Ping =====
             // - Verifica funcionalidade do Ator
             MessageWCM::Ping => {},
 
