@@ -16,6 +16,8 @@ enum MessageDSM {
     SendKeys {
         author: ActorWCC
     },
+
+    Ping,
 }
 
 impl ActorDSM {
@@ -50,6 +52,10 @@ impl ActorDSM {
             // - Envia cada frase individualmente para SWM pela mensagem FILTER
             // - Envia PROCESSDONE para SWM quando atingir o término
             MessageDSM::ProcessKeys { author: ActorWCC } => {},
+
+            // ===== PING =====
+            // - Verifica funcionalidade do Ator
+            MessageDSM::Ping => {},
 
             // Mensagem não identificada
             _ => {}

@@ -14,6 +14,8 @@ enum MessageWCC {
     Display {
         data_map: HashMap<String, Vec<(String, String)>>,
     },
+
+    Ping,
 }
 
 impl ActorWCC {
@@ -43,6 +45,10 @@ impl ActorWCC {
             //       aparições (todos os itens da chave)
             // - Deve imprimir modelo: "{key} {frase adaptada} (from: {frase original})"
             MessageWCC::Display { data_map } => {},
+
+            // ===== PING =====
+            // - Verifica funcionalidade do Ator
+            MessageWCC::Ping => {},
 
             // Mensagem não identificada
             _ => {}

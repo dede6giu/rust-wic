@@ -16,6 +16,8 @@ enum MessageWCM {
     RequestWICMap {
         author: Actor,
     },
+
+    Ping,
 }
 
 impl ActorWCM {
@@ -39,6 +41,10 @@ impl ActorWCM {
             // ===== REQUESTWICMAP =====
             // - Envia para author a mensagem DISPLAY
             MessageWCM::RequestWICMap { author } => {}
+
+            // ===== PING =====
+            // - Verifica funcionalidade do Ator
+            MessageWCM::Ping => {},
 
             // Mensagem não identificada
             _ => {}

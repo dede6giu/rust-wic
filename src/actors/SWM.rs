@@ -19,6 +19,8 @@ enum MessageSWM {
     ProcessDone {
         author: ActorWCC,
     },
+
+    Ping,
 }
 
 impl ActorSWM {
@@ -59,6 +61,10 @@ impl ActorSWM {
             // ==== PROCESSDONE =====
             // - Apenas transmite REQUESTWICMAP para WCM
             MessageSWM::ProcessDone { author } => {}
+
+            // ===== PING =====
+            // - Verifica funcionalidade do Ator
+            MessageSWM::Ping => {},
 
             // Mensagem não identificada
             _ => {}
