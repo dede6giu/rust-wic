@@ -1,6 +1,6 @@
 use actix::prelude::*;
 use std::fs;
-use crate::utils::text_processing::{self, extract_sentences};
+use crate::utils::text_processing::{extract_sentences};
 use crate::actors::SWM;
 use crate::actors::WCM;
 use std::collections::HashMap;
@@ -76,7 +76,7 @@ impl Handler<Setup> for ActorDSM {
         // Lê o arquivo
         this.data_raw = fs::read_to_string(msg.path_input).expect("Não foi possível ler o arquivo");
         // Forma o vetor de Strings
-        this.sentences = text_processing::extract_sentences(&self.data_raw);
+        this.sentences = extract_sentences(&self.data_raw);
 
 
         // O `async move` cria uma espécie de struct (o Future) em que os atributos são cada variável contida em seu corpo (os valores das variáveis são movidos para esses atributos)
