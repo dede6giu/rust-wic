@@ -1,5 +1,7 @@
 use actix::prelude::*;
 use crate::actors::SWM;
+use crate::actors::WCM;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct ActorDSM {
@@ -41,32 +43,32 @@ impl Handler<Ping> for ActorDSM {
     }
 }
 
-// ===== Startup =====
-// - Envia "Startup" para SWM
+// ===== Setup =====
+// - Envia "Setup" para SWM
 // - Processa o input e salva internamente
 #[derive(Message)]
 #[rtype(result = "Result<bool, std::io::Error>")]
-pub struct Startup {
+pub struct Setup {
     pub path_input: String,
     pub path_stopwords: String,
 }
-impl Startup {
+impl Setup {
     pub fn new(
         path_input: String,
         path_stopwords: String,
     ) -> Self {
-        Startup { 
+        Setup { 
             path_input,
             path_stopwords,
         }
     }
 }
-impl Handler<Startup> for ActorDSM {
+impl Handler<Setup> for ActorDSM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
     fn handle(
         &mut self,
-        msg: Startup,
+        msg: Setup,
         _ctx: &mut Context<Self>
     ) -> Self::Result {
         let this = self.clone();
@@ -74,8 +76,51 @@ impl Handler<Startup> for ActorDSM {
         // TODO: Processamento de input
 
         Box::pin(async move {    
-            let res = this.ref_swm.send(SWM::Startup::new(msg.path_stopwords)).await.unwrap();
+            let res = this.ref_swm.send(SWM::Setup::new(msg.path_stopwords)).await.unwrap();
             res
         })
+    }
+}
+
+// ===== SendKeys =====
+// - Envia cada frase para SWM (mensagem Filter)
+// - Espera SWM terminar seu próprio processo
+// - Envia Transmit para SWM (ReqWIC para WCM)
+// - Retorna HashMap pronto
+#[derive(Message)]
+#[rtype(result = "Result<HashMap<String, Vec<String>>, std::io::Error>")]
+pub struct SendKeys { }
+impl SendKeys {
+    pub fn new() -> Self {
+        SendKeys { }
+    }
+}
+impl Handler<SendKeys> for ActorDSM {
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
+
+    fn handle(
+        &mut self,
+        _msg: SendKeys,
+        _ctx: &mut Context<Self>
+    ) -> Self::Result {
+        let this = self.clone();
+
+        // TODO
+        // Para cada frase:
+        // - Envie Filter(phrase)
+        // - Esperar Result do Box
+        // - Verificar Ok()
+        // - Próxima frase
+        Box::pin(async move {
+            let res = this.ref_swm.send(SWM::Phrase::new()).await.unwrap();
+            res
+        });
+
+        // TODO
+        // - Enviar Transmit(WCM::ReqWIC) para SWM
+        Box::pin(async move {
+            let res = this.ref_swm.send(SWM::Transmit::new(WCM::ReqWIC::new())).await.unwrap();
+            res
+        })        
     }
 }

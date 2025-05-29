@@ -1,6 +1,6 @@
 use actix::prelude::*;
 use crate::actors::WCM;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Clone)]
 pub struct ActorSWM {
@@ -43,34 +43,61 @@ impl Handler<Ping> for ActorSWM {
     }
 }
 
-// ===== Startup =====
-// - Processa o stopwords e salva internamente
+// ===== Setup =====
+// - Processa o arquivo stopwords e salva internamente
 #[derive(Message)]
 #[rtype(result = "Result<bool, std::io::Error>")]
-pub struct Startup {
+pub struct Setup {
     pub path_stopwords: String,
 }
-impl Startup {
+impl Setup {
     pub fn new(
         path_stopwords: String,
     ) -> Self {
-        Startup { 
+        Setup { 
             path_stopwords,
         }
     }
 }
-impl Handler<Startup> for ActorSWM {
+impl Handler<Setup> for ActorSWM {
     type Result = Result<bool, std::io::Error>;
 
     fn handle(
         &mut self,
-        _msg: Startup,
+        _msg: Setup,
         _ctx: &mut Context<Self>
     ) -> Self::Result {
-        let this = self.clone();
 
         // TODO: Processamento de stopword
 
         Ok(true)
+    }
+}
+
+// ===== Transmit =====
+// - Envia uma mensagem para baixo (WCM)
+#[derive(Message)]
+#[rtype(result = "Result<HashMap<String, Vec<String>>, std::io::Error>")]
+pub struct Transmit<T: actix::Message> {
+    dwn_msg: T,
+}
+impl<T: actix::Message> Transmit<T> {
+    pub fn new(
+        dwn_msg: T,
+    ) -> Self {
+        Transmit {
+            dwn_msg,
+        }
+    }
+}
+impl<T: actix::Message> Handler<Transmit<T>> for ActorSWM {
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
+
+    fn handle(
+        &mut self,
+        _msg: Transmit<T>,
+        _ctx: &mut Context<Self>
+    ) -> Self::Result {
+        
     }
 }

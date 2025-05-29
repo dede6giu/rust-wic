@@ -1,16 +1,22 @@
 use actix::prelude::*;
 use std::collections::HashMap;
+use std::sync::{Arc, LazyLock};
+use tokio::sync::Mutex;
+
+type Db = HashMap<String, Vec<String>>;
+
+static mut ST_WIC: LazyLock<Arc<Mutex<Db>>> = LazyLock::new(|| Arc::new( Mutex::new(HashMap::new())));
 
 #[derive(Clone)]
 pub struct ActorWCM {
-    words_context: HashMap<String, Vec<(String, String)>>
+
 }
 impl ActorWCM {
     pub fn new(
         
     ) -> Self {
-        ActorWCM { 
-            words_context: HashMap::new(),
+        ActorWCM {
+
         }
     }
 }

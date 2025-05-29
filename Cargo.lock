@@ -293,6 +293,7 @@ name = "rust-wic"
 version = "0.1.0"
 dependencies = [
  "actix",
+ "tokio",
 ]
 
 [[package]]
