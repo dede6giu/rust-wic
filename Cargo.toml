@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 actix = "0.13.5"
+tokio = "1.45.1"

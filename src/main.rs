@@ -16,22 +16,38 @@ use crate::actors::WCM;
 
 #[actix::main]
 async fn main() {
-    println!("Hello, world!");
-    
-    let path_input = String::new();
-    let path_stopw = String::new();
 
+    println!("Iniciando...");
     let actor_wcm = WCM::ActorWCM::new().start(); 
     let actor_swm = SWM::ActorSWM::new(actor_wcm).start();
     let actor_dsm = DSM::ActorDSM::new(actor_swm).start();
     let actor_wcc = WCC::ActorWCC::new(actor_dsm).start();
+    
+    
+    // TODO
+    // Requisita paths para os arquivos de input e stopword
+    // Requisita path para output
+    let path_input = String::new();
+    let path_stopw = String::new();
+    let path_outpt = String::new();
 
-    let res = actor_wcc.send(WCC::Startup::new(path_input, path_stopw)).await.unwrap();
 
-    match res {
-        Ok(_) => println!("Sucesso!"),
-        Err(_) => println!("Erro..."),
+    // Inicia cadeia de mensagens de Setup
+    let res_setup = actor_wcc.send(WCC::Setup::new(path_input, path_stopw)).await.unwrap();
+    match res_setup {
+        Ok(_) => println!("Sucesso no Setup!"),
+        Err(e) => println!("Erro no Setup: {}", e),
     }
 
+
+    // Inicia o programa
+    let res_run = actor_wcc.send(WCC::Run::new()).await.unwrap();
+    match res_run {
+        Ok(_) => println!("Sucesso no Setup!"), // recuperar resultado do hashmap
+        Err(e) => println!("Erro no Setup: {}", e),
+    }
+
+
     System::current().stop();
+
 }
