@@ -1,11 +1,13 @@
 use actix::prelude::*;
+use std::fs;
+use crate::utils::text_processing::{self, extract_senteces};
 use crate::actors::SWM;
 
 #[derive(Clone)]
 pub struct ActorDSM {
     ref_swm: Addr::<SWM::ActorSWM>,
     data_raw: String,
-    list_phrase: Vec<String>,
+    sentences: Vec<String>,
 }
 impl ActorDSM {
     pub fn new(
@@ -14,10 +16,11 @@ impl ActorDSM {
         ActorDSM { 
             ref_swm: child_swm,
             data_raw: String::new(),
-            list_phrase: Vec::new(),
+            sentences: Vec::new(),
         }
     }
 }
+// Trait obtigatório para qualquer ator no actix
 impl Actor for ActorDSM {
     type Context = Context<Self>;
 }
@@ -64,18 +67,20 @@ impl Startup {
 impl Handler<Startup> for ActorDSM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
-    fn handle(
-        &mut self,
-        msg: Startup,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
-        let this = self.clone();
+    fn handle(&mut self, msg: Startup, _ctx: &mut Context<Self>) -> Self::Result {
+        // `this` é uma cópia de `self`. Não depende, portanto, do seu lifetime, que é limitado, pois a posse de `self` só foi emprestada ao escopo da função.
+        let mut this = self.clone();
 
-        // TODO: Processamento de input
+        // Lê o arquivo
+        this.data_raw = fs::read_to_string(msg.path_input).expect("Não foi possível ler o arquivo");
+        // Forma o vetor de Strings
+        this.sentences = text_processing::extract_senteces(&self.data_raw);
 
+
+        // O `async move` cria uma espécie de struct (o Future) em que os atributos são cada variável contida em seu corpo (os valores das variáveis são movidos para esses atributos)
+        // Por isso que precisamos do this, não poderíamos fazer o move de um valor emprestado (self)
         Box::pin(async move {    
-            let res = this.ref_swm.send(SWM::Startup::new(msg.path_stopwords)).await.unwrap();
-            res
+            this.ref_swm.send(SWM::Startup::new(msg.path_stopwords)).await.unwrap()
         })
     }
 }

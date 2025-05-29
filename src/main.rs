@@ -5,6 +5,7 @@ mod actors {
     pub mod SWM;
     pub mod WCM;
 }
+mod utils;
 
 use actix::System;
 use actix::Actor;
