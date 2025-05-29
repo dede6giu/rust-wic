@@ -79,21 +79,15 @@ impl Handler<Setup> for ActorWCC {
 // - Envia "SendKeys" para DSM
 // - Retorna HashMap pronto
 #[derive(Message)]
-#[rtype(result = "Result<HashMap<String, Vec<(String, String)>>, std::io::Error>")]
-pub struct Run {
-    
-}
+#[rtype(result = "Result<HashMap<String, Vec<String>>, std::io::Error>")]
+pub struct Run { }
 impl Run {
-    pub fn new(
-        
-    ) -> Self {
-        Run { 
-            
-        }
+    pub fn new() -> Self {
+        Run { }
     }
 }
 impl Handler<Run> for ActorWCC {
-    type Result = Result<HashMap<String, Vec<String>>, std::io::Error>;
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
 
     fn handle(
         &mut self,

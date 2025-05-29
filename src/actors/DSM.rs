@@ -105,22 +105,18 @@ impl Handler<SendKeys> for ActorDSM {
     ) -> Self::Result {
         let this = self.clone();
 
-        // TODO
-        // Para cada frase:
-        // - Envie Filter(phrase)
-        // - Esperar Result do Box
-        // - Verificar Ok()
-        // - Próxima frase
         Box::pin(async move {
-            let res = this.ref_swm.send(SWM::Phrase::new()).await.unwrap();
-            res
-        });
-
-        // TODO
-        // - Enviar Transmit(WCM::ReqWIC) para SWM
-        Box::pin(async move {
-            let res = this.ref_swm.send(SWM::Transmit::new(WCM::ReqWIC::new())).await.unwrap();
-            res
-        })        
+            // TODO
+            // Para cada frase:
+            // - Envie Filter(phrase)
+            // - Esperar Result
+            // - Verificar Ok()
+            // - Próxima iteração
+            this.ref_swm.send(SWM::Filter::new()).await.unwrap();
+            
+            // TODO
+            // - Enviar Transmit(WCM::ReqWIC) para SWM
+            this.ref_swm.send(SWM::ReqWIC::new()).await.unwrap()
+        })
     }
 }

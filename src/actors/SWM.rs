@@ -74,30 +74,64 @@ impl Handler<Setup> for ActorSWM {
     }
 }
 
-// ===== Transmit =====
-// - Envia uma mensagem para baixo (WCM)
+// ===== ReqWIC =====
+// - Envia ReqWIC para WCM
 #[derive(Message)]
 #[rtype(result = "Result<HashMap<String, Vec<String>>, std::io::Error>")]
-pub struct Transmit<T: actix::Message> {
-    dwn_msg: T,
-}
-impl<T: actix::Message> Transmit<T> {
-    pub fn new(
-        dwn_msg: T,
-    ) -> Self {
-        Transmit {
-            dwn_msg,
-        }
+pub struct ReqWIC { }
+impl ReqWIC {
+    pub fn new() -> Self {
+        ReqWIC { }
     }
 }
-impl<T: actix::Message> Handler<Transmit<T>> for ActorSWM {
+impl Handler<ReqWIC> for ActorSWM {
     type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
 
     fn handle(
         &mut self,
-        _msg: Transmit<T>,
+        _msg: ReqWIC,
         _ctx: &mut Context<Self>
     ) -> Self::Result {
         
+        let this = self.clone();
+
+        // TODO: Processamento de input
+
+        Box::pin(async move {    
+            this.ref_wcm.send(WCM::ReqWIC::new()).await.unwrap()
+        })
+
+    }
+}
+
+
+// ===== Filter =====
+// - Recebe uma frase
+// - Palavra por palavra, checa se é stopword
+//     - Se sim, próxima iteração
+//     - Se não, envia KeywordAdd para WCM
+#[derive(Message)]
+#[rtype(result = "Result<bool, std::io::Error>")]
+pub struct Filter { }
+impl Filter {
+    pub fn new() -> Self {
+        Filter { }
+    }
+}
+impl Handler<Filter> for ActorSWM {
+    type Result = ResponseFuture<Result<bool, std::io::Error>>;
+
+    fn handle(
+        &mut self,
+        _msg: Filter,
+        _ctx: &mut Context<Self>
+    ) -> Self::Result {
+        let this = self.clone();
+        
+        Box::pin(async move {
+            // TODO: Processamento de input
+            let res = this.ref_wcm.send(WCM::KeywordAdd::new(/* keyword */, /* phrase */)).await.unwrap();
+            res
+        })
     }
 }
