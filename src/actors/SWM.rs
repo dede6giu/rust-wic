@@ -13,9 +13,7 @@ pub struct ActorSWM {
     stop_words: HashSet<String>,
 }
 impl ActorSWM {
-    pub fn new(
-        child_wcm: Addr::<WCM::ActorWCM>,
-    ) -> Self {
+    pub fn new(child_wcm: Addr::<WCM::ActorWCM>) -> Self {
         ActorSWM { 
             ref_wcm: child_wcm,
             raw_stop_words: String::new(),

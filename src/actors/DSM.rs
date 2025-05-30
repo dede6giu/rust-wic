@@ -13,9 +13,7 @@ pub struct ActorDSM {
     sentences: Vec<String>,
 }
 impl ActorDSM {
-    pub fn new(
-        child_swm: Addr::<SWM::ActorSWM>,
-    ) -> Self {
+    pub fn new(child_swm: Addr::<SWM::ActorSWM>) -> Self {
         ActorDSM { 
             ref_swm: child_swm,
             data_raw: String::new(),
@@ -32,18 +30,14 @@ impl Actor for ActorDSM {
 // - Verifica se o ator está funcionando.
 // - Imprime mensagem no console.
 #[derive(Message)]
-#[rtype(result = "Result<bool, std::io::Error>")]
+#[rtype(result = "bool")]
 pub struct Ping();
 impl Handler<Ping> for ActorDSM {
-    type Result = Result<bool, std::io::Error>;
+    type Result = bool;
 
-    fn handle(
-        &mut self,
-        _msg: Ping,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, _msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
         println!("Actor {} ping!", "DSM");
-        Ok(true)
+        true
     }
 }
 
@@ -110,7 +104,7 @@ impl Handler<SendKeys> for ActorDSM {
                 let result_filter = this.ref_swm
                 .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
                 .await
-                .map_err(|_| dsm_error::DSMError::FilterSendError(filter_error::FilterError::SendError))?;
+                .map_err(|_| dsm_error::DSMError::FilterSendError(filter_error::FilterError::SendError))?; // Usamos o map_err para transformar o erro retornado pelo Filter (FilterError) em uma variante do DSMErrror (FilterSendError)
 
                 result_filter.map_err(|e| dsm_error::DSMError::FilterSendError(e))?;
             }
@@ -120,7 +114,7 @@ impl Handler<SendKeys> for ActorDSM {
             let result_reqwic = this.ref_swm
                 .send(SWM::ReqWIC::new())
                 .await
-                .map_err(|_| dsm_error::DSMError::ReqWICSendError(reqwic_error::ReqWICError::SendError))?;
+                .map_err(|_| dsm_error::DSMError::ReqWICSendError(reqwic_error::ReqWICError::SendError))?; // Usamos o map_err para transformar o erro retornado pelo ReqWIC (ReqWICError) em uma variante do DSMErrror (ReqWICSendError)
 
             result_reqwic.map_err(dsm_error::DSMError::ReqWICSendError)
         })
