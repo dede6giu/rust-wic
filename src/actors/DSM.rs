@@ -1,6 +1,7 @@
 use actix::prelude::*;
 use std::fs;
 use crate::utils::text_processing::{extract_sentences};
+use crate::errors::{filter_error, dsm_error, reqwic_error};
 use crate::actors::SWM;
 use crate::actors::WCM;
 use std::collections::HashMap;
@@ -90,7 +91,7 @@ impl Handler<Setup> for ActorDSM {
 // - Envia Transmit para SWM (ReqWIC para WCM)
 // - Retorna HashMap pronto
 #[derive(Message)]
-#[rtype(result = "Result<HashMap<String, Vec<String>>, std::io::Error>")]
+#[rtype(result = "Result<HashMap<String, Vec<String>>, dsm_error::DSMError>")]
 pub struct SendKeys { }
 impl SendKeys {
     pub fn new() -> Self {
@@ -98,7 +99,7 @@ impl SendKeys {
     }
 }
 impl Handler<SendKeys> for ActorDSM {
-    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, dsm_error::DSMError>>;
 
     fn handle(&mut self, _msg: SendKeys, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
@@ -109,22 +110,19 @@ impl Handler<SendKeys> for ActorDSM {
                 let result_filter = this.ref_swm
                 .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
                 .await
-                .unwrap();
+                .map_err(|_| dsm_error::DSMError::FilterSendError(filter_error::FilterError::SendError))?;
 
-                match result_filter {
-                    Ok(_) => continue, // Caso o envio seja bem sucedido, seguimos para a próxima iteração
-                    Err(e) => {
-                        return Err(std::io::Error::new( // Caso contrário, retornamos o erro
-                            std::io::ErrorKind::Other,
-                            format!("Erro ao enviar mensagem: {}", e),
-                        ));
-                    },
-                }
+                result_filter.map_err(|e| dsm_error::DSMError::FilterSendError(e))?;
             }
             
             // TODO
             // - Enviar Transmit(WCM::ReqWIC) para SWM
-            this.ref_swm.send(SWM::ReqWIC::new()).await.unwrap()
+            let result_reqwic = this.ref_swm
+                .send(SWM::ReqWIC::new())
+                .await
+                .map_err(|_| dsm_error::DSMError::ReqWICSendError(reqwic_error::ReqWICError::SendError))?;
+
+            result_reqwic.map_err(dsm_error::DSMError::ReqWICSendError)
         })
     }
 }

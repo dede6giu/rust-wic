@@ -1,6 +1,7 @@
 use actix::prelude::*;
 use crate::actors::WCM;
 use crate::utils::text_processing::{extract_stop_words};
+use crate::errors::{filter_error, reqwic_error};
 use std::fs;
 use std::sync::Arc;
 use std::collections::{HashMap, HashSet};
@@ -30,18 +31,14 @@ impl Actor for ActorSWM {
 // - Verifica se o ator está funcionando.
 // - Imprime mensagem no console.
 #[derive(Message)]
-#[rtype(result = "Result<bool, std::io::Error>")]
+#[rtype(result = "bool")]
 pub struct Ping();
 impl Handler<Ping> for ActorSWM {
-    type Result = Result<bool, std::io::Error>;
+    type Result = bool;
 
-    fn handle(
-        &mut self,
-        _msg: Ping,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, _msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
         println!("Actor {} ping!", "SWM");
-        Ok(true)
+        true
     }
 }
 
@@ -73,7 +70,7 @@ impl Handler<Setup> for ActorSWM {
 // ===== ReqWIC =====
 // - Envia ReqWIC para WCM
 #[derive(Message)]
-#[rtype(result = "Result<HashMap<String, Vec<String>>, std::io::Error>")]
+#[rtype(result = "Result<HashMap<String, Vec<String>>, reqwic_error::ReqWICError>")]
 pub struct ReqWIC { }
 impl ReqWIC {
     pub fn new() -> Self {
@@ -81,14 +78,18 @@ impl ReqWIC {
     }
 }
 impl Handler<ReqWIC> for ActorSWM {
-    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, reqwic_error::ReqWICError>>;
 
-    fn handle(&mut self, msg: ReqWIC, _ctx: &mut Context<Self>) -> Self::Result {
+    fn handle(&mut self, _msg: ReqWIC, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
 
         // TODO: Processamento de input
         Box::pin(async move {    
-            this.ref_wcm.send(WCM::ReqWIC::new()).await.unwrap()
+            this.ref_wcm
+            .send(WCM::ReqWIC::new())
+            .await
+            .unwrap()
+            .map_err(|_| reqwic_error::ReqWICError::SendError)
         })
     }
 }
@@ -100,7 +101,7 @@ impl Handler<ReqWIC> for ActorSWM {
 //     - Se sim, próxima iteração
 //     - Se não, envia KeywordAdd para WCM
 #[derive(Message)]
-#[rtype(result = "Result<bool, std::io::Error>")]
+#[rtype(result = "Result<bool, filter_error::FilterError>")]
 pub struct Filter {
     pub sentence: String,
 }
@@ -112,7 +113,7 @@ impl Filter {
     }
 }
 impl Handler<Filter> for ActorSWM {
-    type Result = ResponseFuture<Result<bool, std::io::Error>>;
+    type Result = ResponseFuture<Result<bool, filter_error::FilterError>>;
 
     fn handle(&mut self, msg: Filter, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();

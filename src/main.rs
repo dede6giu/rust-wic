@@ -6,6 +6,7 @@ mod actors {
     pub mod WCM;
 }
 mod utils;
+mod errors;
 
 use actix::System;
 use actix::Actor;

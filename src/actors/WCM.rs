@@ -29,11 +29,7 @@ pub struct Ping();
 impl Handler<Ping> for ActorWCM {
     type Result = Result<bool, std::io::Error>;
 
-    fn handle(
-        &mut self,
-        _msg: Ping,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, _msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
         println!("Actor {} ping!", "WCM");
         Ok(true)
     }
@@ -52,11 +48,7 @@ impl ReqWIC {
 impl Handler<ReqWIC> for ActorWCM {
     type Result = ResponseFuture<Result<Db, std::io::Error>>;
 
-    fn handle(
-        &mut self,
-        _msg: ReqWIC,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, _msg: ReqWIC, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
         
         Box::pin(async move {
