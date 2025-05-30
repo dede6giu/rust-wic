@@ -7,7 +7,6 @@ pub struct ActorSWM {
     ref_wcm: Addr::<WCM::ActorWCM>,
     data_raw: String,
     list_phrase: HashSet<String>,
-
 }
 impl ActorSWM {
     pub fn new(
