@@ -5,9 +5,14 @@ use std::collections::{HashMap, HashSet};
 #[derive(Clone)]
 pub struct ActorSWM {
     ref_wcm: Addr::<WCM::ActorWCM>,
+<<<<<<< HEAD
     raw_stop_words: String,
     stop_words: HashSet<String>,
 
+=======
+    data_raw: String,
+    list_phrase: HashSet<String>,
+>>>>>>> 5eecd720f1d3fe26bcdfa0a04b217c737cbbc49a
 }
 impl ActorSWM {
     pub fn new(
