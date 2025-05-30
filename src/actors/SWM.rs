@@ -1,18 +1,13 @@
 use actix::prelude::*;
 use crate::actors::WCM;
+use std::sync::Arc;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Clone)]
 pub struct ActorSWM {
     ref_wcm: Addr::<WCM::ActorWCM>,
-<<<<<<< HEAD
     raw_stop_words: String,
     stop_words: HashSet<String>,
-
-=======
-    data_raw: String,
-    list_phrase: HashSet<String>,
->>>>>>> 5eecd720f1d3fe26bcdfa0a04b217c737cbbc49a
 }
 impl ActorSWM {
     pub fn new(
@@ -132,27 +127,15 @@ impl Handler<Filter> for ActorSWM {
 
     fn handle(&mut self, msg: Filter, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
-        
-        for word in &msg.sentence.split_whitespace() {
-            if !this.stop_words.contains(word) {
-                Box::pin(async move {
-                    return this.ref_wcm
-                    .send(WCM::KeywordAdd::new(word.clone(), (msg.sentence).clone()))
-                    .await
-                    .unwrap()
-                })
-            }
-        }
-    }
-    fn handle(&mut self, msg: Filter, _ctx: &mut Context<Self>) -> Self::Result {
-        let this = self.clone();
-        let sentence = msg.sentence.clone();
+        // Para enviar as frases junto com as keywords, teríamos que clonar a frase a cada iteração, pois, caso contrário, ela seria `moved` na primeira iteração e não teríamos mais como iterar sobre ela
+        let shared_sentence = Arc::new(msg.sentence.clone());
+        // Ao invés disso, usamos um ponteiro inteligente Arc<T> para clonar a frase apenas uma vez (precisamos clonar pois moveremos uma palavra da frase a cada iteração do for), dessa forma, cada keyword fica associada a mesma referência à frase, o que é mais eficiente do que fazer as cópias.
 
         Box::pin(async move {
-            for word in sentence.split_whitespace() {
+            for word in msg.sentence.split_whitespace() {
                 if !this.stop_words.contains(word) {
                     let _ = this.ref_wcm
-                        .send(WCM::KeywordAdd::new(word, sentence.clone()))
+                        .send(WCM::KeywordAdd::new(word.to_string(), Arc::clone(&shared_sentence)))
                         .await
                         .unwrap();
                 }

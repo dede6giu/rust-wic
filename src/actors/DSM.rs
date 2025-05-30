@@ -10,7 +10,6 @@ pub struct ActorDSM {
     ref_swm: Addr::<SWM::ActorSWM>,
     data_raw: String,
     sentences: Vec<String>,
-    filtered_sentences: Vec<String>,
 }
 impl ActorDSM {
     pub fn new(
@@ -19,8 +18,7 @@ impl ActorDSM {
         ActorDSM { 
             ref_swm: child_swm,
             data_raw: String::new(),
-            sentences: Vec::new(),
-            filtered_sentences: Vec::new(),
+            sentences: Vec::new()
         }
     }
 }

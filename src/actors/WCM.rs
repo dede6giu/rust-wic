@@ -73,29 +73,22 @@ impl Handler<ReqWIC> for ActorWCM {
 #[rtype(result = "Result<bool, std::io::Error>")]
 pub struct KeywordAdd {
     key: String,
-    phrase: String,
+    sentence: Arc<String>,
 }
 impl KeywordAdd {
-    pub fn new(
-        key: String,
-        phrase: String,
-    ) -> Self {
+    pub fn new(key: String, sentence: Arc<String>) -> Self {
         KeywordAdd {
             key,
-            phrase,
+            sentence,
         }
     }
 }
 impl Handler<KeywordAdd> for ActorWCM {
     type Result = Result<bool, std::io::Error>;
 
-    fn handle(
-        &mut self,
-        msg: KeywordAdd,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, msg: KeywordAdd, _ctx: &mut Context<Self>) -> Self::Result {
         let SIZE_WIC_AROUND = 2; // Transformar em não-hardcoded eventualmente
-        let parts = msg.phrase.split(" ");
+        let parts = msg.sentence.split(" ");
         let word_list = parts.collect::<Vec<&str>>();
 
         let mut i_pos = 0;
