@@ -8,9 +8,7 @@ pub struct ActorWCC {
     ref_dsm: Addr::<DSM::ActorDSM>,
 }
 impl ActorWCC {
-    pub fn new(
-        child_dsm: Addr::<DSM::ActorDSM>,
-    ) -> Self {
+    pub fn new(child_dsm: Addr::<DSM::ActorDSM>) -> Self {
         ActorWCC { 
             ref_dsm: child_dsm,
         }
@@ -24,18 +22,14 @@ impl Actor for ActorWCC {
 // - Verifica se o ator está funcionando.
 // - Imprime mensagem no console.
 #[derive(Message)]
-#[rtype(result = "Result<bool, std::io::Error>")]
+#[rtype(result = "bool")]
 pub struct Ping();
 impl Handler<Ping> for ActorWCC {
-    type Result = Result<bool, std::io::Error>;
+    type Result = bool;
 
-    fn handle(
-        &mut self,
-        _msg: Ping,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, _msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
         println!("Actor {} ping!", "WCC");
-        Ok(true)
+        true
     }
 }
 
@@ -49,10 +43,7 @@ pub struct Setup {
     pub path_stopwords: String,
 }
 impl Setup {
-    pub fn new(
-        path_input: String,
-        path_stopwords: String,
-    ) -> Self {
+    pub fn new(path_input: String, path_stopwords: String) -> Self {
         Setup { 
             path_input,
             path_stopwords,
@@ -62,16 +53,14 @@ impl Setup {
 impl Handler<Setup> for ActorWCC {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
-    fn handle(
-        &mut self,
-        msg: Setup,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, msg: Setup, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
 
         Box::pin(async move {    
-            let res = this.ref_dsm.send(DSM::Setup::new(msg.path_input, msg.path_stopwords)).await.unwrap();
-            res
+            this.ref_dsm
+            .send(DSM::Setup::new(msg.path_input, msg.path_stopwords))
+            .await
+            .unwrap()
         })
     }
 }
@@ -90,16 +79,14 @@ impl Run {
 impl Handler<Run> for ActorWCC {
     type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, DSMError>>;
 
-    fn handle(
-        &mut self,
-        _msg: Run,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, _msg: Run, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
 
-        Box::pin(async move {    
-            let res = this.ref_dsm.send(DSM::SendKeys::new()).await.unwrap();
-            res
+        Box::pin(async move {
+            this.ref_dsm
+            .send(DSM::SendKeys::new())
+            .await
+            .unwrap()
         })
     }
 }
