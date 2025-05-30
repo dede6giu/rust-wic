@@ -5,8 +5,8 @@ use std::collections::{HashMap, HashSet};
 #[derive(Clone)]
 pub struct ActorSWM {
     ref_wcm: Addr::<WCM::ActorWCM>,
-    data_raw: String,
-    list_phrase: HashSet<String>,
+    raw_stop_words: String,
+    stop_words: HashSet<String>,
 
 }
 impl ActorSWM {
@@ -15,8 +15,8 @@ impl ActorSWM {
     ) -> Self {
         ActorSWM { 
             ref_wcm: child_wcm,
-            data_raw: String::new(),
-            list_phrase: HashSet::new(),
+            raw_stop_words: String::new(),
+            stop_words: HashSet::new(),
         }
     }
 }
@@ -112,26 +112,47 @@ impl Handler<ReqWIC> for ActorSWM {
 //     - Se não, envia KeywordAdd para WCM
 #[derive(Message)]
 #[rtype(result = "Result<bool, std::io::Error>")]
-pub struct Filter { }
+pub struct Filter {
+    pub sentence: String,
+}
 impl Filter {
-    pub fn new() -> Self {
-        Filter { }
+    pub fn new(sentence: String) -> Self {
+        Filter {
+            sentence: sentence,
+        }
     }
 }
 impl Handler<Filter> for ActorSWM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
-    fn handle(
-        &mut self,
-        _msg: Filter,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
+    fn handle(&mut self, msg: Filter, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
         
+        for word in &msg.sentence.split_whitespace() {
+            if !this.stop_words.contains(word) {
+                Box::pin(async move {
+                    return this.ref_wcm
+                    .send(WCM::KeywordAdd::new(word.clone(), (msg.sentence).clone()))
+                    .await
+                    .unwrap()
+                })
+            }
+        }
+    }
+    fn handle(&mut self, msg: Filter, _ctx: &mut Context<Self>) -> Self::Result {
+        let this = self.clone();
+        let sentence = msg.sentence.clone();
+
         Box::pin(async move {
-            // TODO: Processamento de input
-            let res = this.ref_wcm.send(WCM::KeywordAdd::new(/* keyword */, /* phrase */)).await.unwrap();
-            res
+            for word in sentence.split_whitespace() {
+                if !this.stop_words.contains(word) {
+                    let _ = this.ref_wcm
+                        .send(WCM::KeywordAdd::new(word, sentence.clone()))
+                        .await
+                        .unwrap();
+                }
+            }
+            Ok(true)
         })
     }
 }

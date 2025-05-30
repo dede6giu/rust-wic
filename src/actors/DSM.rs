@@ -58,10 +58,7 @@ pub struct Setup {
     pub path_stopwords: String,
 }
 impl Setup {
-    pub fn new(
-        path_input: String,
-        path_stopwords: String,
-    ) -> Self {
+    pub fn new(path_input: String, path_stopwords: String) -> Self {
         Setup { 
             path_input,
             path_stopwords,
@@ -109,21 +106,19 @@ impl Handler<SendKeys> for ActorDSM {
         let this = self.clone();
 
         Box::pin(async move {
-            // TODO
-            // Para cada frase:
-            // - Envie Filter(phrase)
-            // - Esperar Result
-            // - Verificar Ok()
-            // - Próxima iteração
-            for sentence in &this.sentences {
-                let result_filter = this.ref_swm.send(SWM::Filter::new(sentence)).await.unwrap();
+            // Note que não percorremos `senteces` por referência, o que seria o padrão para não mover os elementos do vetor (normalmente, não é desejável) ou gerar cópias (o que é custoso)
+            for sentence in this.sentences {
+                let result_filter = this.ref_swm
+                .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
+                .await
+                .unwrap();
 
                 match result_filter {
-                    Ok(_) => continue,
+                    Ok(_) => continue, // Caso o envio seja bem sucedido, seguimos para a próxima iteração
                     Err(e) => {
-                        return Err(std::io::Error::new(
+                        return Err(std::io::Error::new( // Caso contrário, retornamos o erro
                             std::io::ErrorKind::Other,
-                            format!("Erro ao aplicar filtro: {}", e),
+                            format!("Erro ao enviar mensagem: {}", e),
                         ));
                     },
                 }
