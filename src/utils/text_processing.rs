@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 pub fn extract_sentences(text: &str) -> Vec<String> {
     let mut sentence = match text.chars().next() {
         Some(c) => c.to_string(), // Inicializa a frase com a primeira letra do texto, se houver
@@ -18,4 +20,12 @@ pub fn extract_sentences(text: &str) -> Vec<String> {
     let mut sentences = vec![sentence.trim().to_string()];
     sentences.extend(extract_sentences(&text[l..])); // Concatena o vetor de String com o resultado da chamada recursiva da função para um slice da String 
     sentences // Retorna o vetor de Strings
+}
+
+pub fn extract_stop_words(text: &str) -> std::collections::HashSet<String> {
+    let mut stop_words = HashSet::new();
+    for word in text.split_whitespace() {
+        stop_words.insert(word.to_string());
+    }
+    stop_words
 }

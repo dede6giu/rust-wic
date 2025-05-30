@@ -1,5 +1,7 @@
 use actix::prelude::*;
 use crate::actors::WCM;
+use crate::utils::text_processing::{extract_stop_words};
+use std::fs;
 use std::sync::Arc;
 use std::collections::{HashMap, HashSet};
 
@@ -51,9 +53,7 @@ pub struct Setup {
     pub path_stopwords: String,
 }
 impl Setup {
-    pub fn new(
-        path_stopwords: String,
-    ) -> Self {
+    pub fn new(path_stopwords: String) -> Self {
         Setup { 
             path_stopwords,
         }
@@ -62,13 +62,9 @@ impl Setup {
 impl Handler<Setup> for ActorSWM {
     type Result = Result<bool, std::io::Error>;
 
-    fn handle(
-        &mut self,
-        _msg: Setup,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
-
-        // TODO: Processamento de stopword
+    fn handle(&mut self, msg: Setup, _ctx: &mut Context<Self>) -> Self::Result {
+        self.raw_stop_words = fs::read_to_string(msg.path_stopwords).expect("Não foi possível ler o arquivo");
+        self.stop_words = extract_stop_words(&self.raw_stop_words);
 
         Ok(true)
     }
@@ -87,20 +83,13 @@ impl ReqWIC {
 impl Handler<ReqWIC> for ActorSWM {
     type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, std::io::Error>>;
 
-    fn handle(
-        &mut self,
-        _msg: ReqWIC,
-        _ctx: &mut Context<Self>
-    ) -> Self::Result {
-        
+    fn handle(&mut self, msg: ReqWIC, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
 
         // TODO: Processamento de input
-
         Box::pin(async move {    
             this.ref_wcm.send(WCM::ReqWIC::new()).await.unwrap()
         })
-
     }
 }
 
