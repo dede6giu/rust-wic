@@ -45,7 +45,7 @@ async fn main() {
     let res_run = actor_wcc.send(WCC::Run::new()).await.unwrap();
     match res_run {
         Ok(_) => println!("Sucesso no Setup!"), // recuperar resultado do hashmap
-        Err(e) => println!("Erro no Setup: {}", e),
+        Err(e) => println!("Erro no Setup"),
     }
 
 
