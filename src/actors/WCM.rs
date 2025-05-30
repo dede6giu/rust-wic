@@ -1,6 +1,6 @@
 use actix::prelude::*;
 use std::collections::HashMap;
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 use tokio::sync::Mutex;
 
 type Db = HashMap<String, Vec<String>>;
@@ -91,10 +91,41 @@ impl Handler<KeywordAdd> for ActorWCM {
 
     fn handle(
         &mut self,
-        _msg: KeywordAdd,
+        msg: KeywordAdd,
         _ctx: &mut Context<Self>
     ) -> Self::Result {
-        // TODO: Método para adicionar palavra no dicionário
+        let SIZE_WIC_AROUND = 2; // Transformar em não-hardcoded eventualmente
+        let parts = msg.phrase.split(" ");
+        let word_list = parts.collect::<Vec<&str>>();
+
+        let mut i_pos = 0;
+        for (i, word) in word_list.iter().enumerate() {
+            // TODO: cheque sempre lowercase
+            if *word == msg.key {
+                i_pos = i;
+            }
+        }
+
+        let key = msg.key;
+        let value = String::new();
+        if word_list.len() <= SIZE_WIC_AROUND*2 + 1 {
+            let mut result = "".to_owned();
+            result.push_str(&key);
+            result.push_str(" ");
+            for word in word_list.iter().skip(i_pos) {
+                
+            }
+        } else {
+
+        }
+
+
+        let this = self.clone();
+        Box::pin(async move {
+            let wic_dict = this.word_context.lock().await;
+            wic_dict;
+        });
+
         Ok(true)
     }
 }
