@@ -36,14 +36,14 @@ mod tests {
     #[test]
     fn sentences_basico_com_divisao() {
         // Entrada: "umaFraseSimples"
-        // Esperado: ["umaFrase", "Simples"]
+        // Esperado: ["uma", "Frase", "Simples"]
         assert_eq!(extract_sentences("umaFraseSimples"), vec!["uma", "Frase", "Simples"]);
     }
 
     #[test]
     fn stopwords_basico_com_conversao_para_minusculas() {
-        // Testa a funcionalidade central de separar palavras por espaço,
-        // convertê-las para minúsculas e inseri-las em um HashSet.
+        // entrada: "Palavra1 PALAVRA2"
+        // saída esperada: HashSet com "palavra1", "palavra2"
         let mut esperado = HashSet::new();
         esperado.insert("palavra1".to_string());
         esperado.insert("palavra2".to_string());
