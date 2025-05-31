@@ -28,7 +28,7 @@ async fn main() {
     
     let path_input = "data/input.txt".to_string();
     let path_stopw = "data/stopwords.txt".to_string();
-    let path_outpt = String::new();
+    // let path_outpt = String::new();
 
     let res_setup = actor_wcc.send(WCC::Setup::new(path_input, path_stopw)).await.unwrap();
     match res_setup {
