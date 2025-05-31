@@ -1,7 +1,8 @@
 use actix::prelude::*;
 use std::fs;
+use crate::errors::dsm_error::DSMError;
 use crate::utils::text_processing::{extract_sentences};
-use crate::errors::{filter_error, dsm_error, reqwic_error};
+use crate::errors::{dsm_error};
 use crate::actors::SWM;
 use crate::actors::WCM;
 use std::collections::HashMap;
@@ -101,22 +102,21 @@ impl Handler<SendKeys> for ActorDSM {
         Box::pin(async move {
             // Note que não percorremos `senteces` por referência, o que seria o padrão para não mover os elementos do vetor (normalmente, não é desejável) ou gerar cópias (o que é custoso)
             for sentence in this.sentences {
-                let result_filter = this.ref_swm
-                .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
-                .await
-                .map_err(|_| dsm_error::DSMError::FilterSendError(filter_error::FilterError::SendError))?; // Usamos o map_err para transformar o erro retornado pelo Filter (FilterError) em uma variante do DSMErrror (FilterSendError)
-
-                result_filter.map_err(|e| dsm_error::DSMError::FilterSendError(e))?;
+                this.ref_swm
+                    .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
+                    .await
+                    .map_err(|_| DSMError::SendError)? // Converte SendError
+                    .map_err(|e| DSMError::FilterError(e))?; // Converte FilterError
             }
             
+            // ISSO AINDA NÃO ESTÁ DEVIDAMENTE IMPLEMENTADO, JOSÉ!!!
             // TODO
             // - Enviar Transmit(WCM::ReqWIC) para SWM
-            let result_reqwic = this.ref_swm
+            this.ref_swm
                 .send(SWM::ReqWIC::new())
                 .await
-                .map_err(|_| dsm_error::DSMError::ReqWICSendError(reqwic_error::ReqWICError::SendError))?; // Usamos o map_err para transformar o erro retornado pelo ReqWIC (ReqWICError) em uma variante do DSMErrror (ReqWICSendError)
-
-            result_reqwic.map_err(dsm_error::DSMError::ReqWICSendError)
+                .map_err(|_| DSMError::SendError)? // Converte SendError
+                .map_err(|e| DSMError::ReqWICError(e)) // Converte ReqWICError
         })
     }
 }
