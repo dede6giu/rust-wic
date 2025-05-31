@@ -55,10 +55,10 @@ impl Handler<ReqWIC> for ActorWCM {
         
         Box::pin(async move {
             let guard = this.word_in_context
-            .lock() // Inicia aquisição do lock → Future
-            .await; // Aguarda disponibilidade do lock
+            .lock()
+            .await;
 
-            Ok(guard.clone()) // Clona os dados (fora do statement que contém o lock, para evitar o lock travado) e retorna eles no Future
+            Ok(guard.clone())
         })
     }
 }

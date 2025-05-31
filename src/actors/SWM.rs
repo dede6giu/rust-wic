@@ -87,8 +87,8 @@ impl Handler<ReqWIC> for ActorSWM {
             let result_reqwic = this.ref_wcm
                 .send(WCM::ReqWIC::new())
                 .await
-                .map_err(|_| reqwic_error::ReqWICError::SendError)? // Lida com o erro de Send
-                .map_err(|_| reqwic_error::ReqWICError::WCMReqWICError)?; // Lida com o erro que pode ter sido propagado do ReqWIC em WCM
+                .map_err(|_| reqwic_error::ReqWICError::SendError)? 
+                .map_err(|_| reqwic_error::ReqWICError::WCMReqWICError)?;
             Ok(result_reqwic)
         })
     }
@@ -117,21 +117,19 @@ impl Handler<Filter> for ActorSWM {
 
     fn handle(&mut self, msg: Filter, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
-        // Para enviar as frases junto com as keywords, teríamos que clonar a frase a cada iteração, pois, caso contrário, ela seria `moved` na primeira iteração e não teríamos mais como iterar sobre ela
         let shared_sentence = Arc::new(msg.sentence.clone());
-        // Ao invés disso, usamos um ponteiro inteligente Arc<T> para clonar a frase apenas uma vez (precisamos clonar pois moveremos uma palavra da frase a cada iteração do for), dessa forma, cada keyword fica associada a mesma referência à frase, o que é mais eficiente do que fazer as cópias.
 
         Box::pin(async move {
             for word in msg.sentence.split_whitespace() {
                 if !this.stop_words.contains(&word.to_lowercase()) {
                     // println!("FILTER: {}", word);
                     let _ = this.ref_wcm
-                            .send(WCM::KeywordAdd::new(word.to_string(), Arc::clone(&shared_sentence))) // Envia a palavra e a mesma referência à frase para todas as palavras da frase
+                            .send(WCM::KeywordAdd::new(word.to_string(), Arc::clone(&shared_sentence)))
                             .await;
 
-                        /* Implementação Falha, ajustar
-                        .map_err(|_| filter_error::FilterError::SendError)? // Se o send não funcionar, o erro ocorrera aqui (quando fazemos o send)
-                        .map_err(|e| filter_error::FilterError::KeywordAddError(e))?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
+                        /*
+                        .map_err(|_| filter_error::FilterError::SendError)?
+                        .map_err(|e| filter_error::FilterError::KeywordAddError(e))?;
                         */
                 }
             }
