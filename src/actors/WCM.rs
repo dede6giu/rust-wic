@@ -53,10 +53,10 @@ impl Handler<ReqWIC> for ActorWCM {
         
         Box::pin(async move {
             let guard = this.word_in_context
-            .lock() // Inicia aquisição do lock → Future
-            .await; // Aguarda disponibilidade do lock
+            .lock()
+            .await;
 
-            Ok(guard.clone()) // Clona os dados (fora do statement que contém o lock, para evitar o lock travado) e retorna eles no Future
+            Ok(guard.clone())
         })
     }
 }
@@ -98,9 +98,6 @@ impl Handler<KeywordAdd> for ActorWCM {
 
         let value: String;
         if word_list.len() <= SIZE_WIC_AROUND*2 + 1 {
-            // Todas palavras são inlusas, a frase
-            // original é muito pequena (5 ou menos
-            // palavras no caso padrão)
             let mut result = "".to_owned();
             result.push_str(&msg.key);
             result.push_str(" ");
@@ -117,8 +114,6 @@ impl Handler<KeywordAdd> for ActorWCM {
             }
             value = result.trim().to_string();
         } else {
-            // Frase maior do que 5 palavras (no padrão)
-            // (algumas palavras são excluídas do contexto)
             let mut result = "".to_owned();
             result.push_str(&msg.key);
             result.push_str(" ");

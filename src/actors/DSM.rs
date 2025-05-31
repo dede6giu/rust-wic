@@ -21,7 +21,6 @@ impl ActorDSM {
         }
     }
 }
-// Trait obtigatório para qualquer ator no actix
 impl Actor for ActorDSM {
     type Context = Context<Self>;
 }
@@ -62,17 +61,9 @@ impl Handler<Setup> for ActorDSM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
     fn handle(&mut self, msg: Setup, _ctx: &mut Context<Self>) -> Self::Result {
-        // Lê o arquivo
         self.data_raw = fs::read_to_string(msg.path_input).expect("Não foi possível ler o arquivo");
-        // Forma o vetor de Strings
         self.sentences = extract_sentences(&self.data_raw);
-
-        // `this` é uma cópia de `self`. Logo, o this, tem posse sobre seus valores, diferente do self, que só tem um empréstimo dessa posse, o que nos impede de mover seus valores nesse escopo (em que só temos um empréstimo dos valores em self)
         let this = self.clone();
-
-
-        // O `async move` cria uma espécie de struct (o Future) em que os atributos são cada variável contida em seu corpo (os valores das variáveis são movidos para esses atributos)
-        // Por isso que precisamos do this. Não poderíamos fazer o move de um valor emprestado (self)
         Box::pin(async move {
             this.ref_swm.send(SWM::Setup::new(msg.path_stopwords)).await.unwrap()
         })
@@ -99,21 +90,18 @@ impl Handler<SendKeys> for ActorDSM {
         let this = self.clone();
 
         Box::pin(async move {
-            // Note que não percorremos `senteces` por referência, o que seria o padrão para não mover os elementos do vetor (normalmente, não é desejável) ou gerar cópias (o que é custoso)
             for sentence in this.sentences {
                 this.ref_swm
-                    .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
+                    .send(SWM::Filter::new(sentence)) 
                     .await
-                    .map_err(|_| SendkeysError::SendError)? // Converte SendError
-                    .map_err(|e| SendkeysError::FilterError(e))?; // Converte FilterError
+                    .map_err(|_| SendkeysError::SendError)?
+                    .map_err(|e| SendkeysError::FilterError(e))?;
             }
             
-            // - Enviar Transmit(WCM::ReqWIC) para SWM
             this.ref_swm
                 .send(SWM::ReqWIC::new())
                 .await
-                .map_err(|_| SendkeysError::SendError)? // Converte SendError
-                .map_err(|e| SendkeysError::ReqWICError(e)) // Converte ReqWICError
-        })
+                .map_err(|_| SendkeysError::SendError)? 
+                .map_err(|e| SendkeysError::ReqWICError(e))
     }
 }
