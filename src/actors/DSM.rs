@@ -108,8 +108,6 @@ impl Handler<SendKeys> for ActorDSM {
                     .map_err(|e| SendkeysError::FilterError(e))?; // Converte FilterError
             }
             
-            // ISSO AINDA NÃO ESTÁ DEVIDAMENTE IMPLEMENTADO, JOSÉ!!!
-            // TODO
             // - Enviar Transmit(WCM::ReqWIC) para SWM
             this.ref_swm
                 .send(SWM::ReqWIC::new())

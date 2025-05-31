@@ -54,6 +54,7 @@ async fn main() {
         Err(_) => println!("Erro no Processamento."),
     }
 
+    // Imprime o resultado
     let res_display = actor_wcc.send(WCC::Display::new(hash_res)).await.unwrap();
     match res_display {
         Ok(_) => { /* println!("Sucesso no Print!") */ },

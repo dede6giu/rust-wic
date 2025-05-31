@@ -82,7 +82,7 @@ impl Handler<KeywordAdd> for ActorWCM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
     fn handle(&mut self, msg: KeywordAdd, _ctx: &mut Context<Self>) -> Self::Result {
-        let SIZE_WIC_AROUND: usize = 2; // Transformar em não-hardcoded eventualmente
+        let SIZE_WIC_AROUND: usize = 2;
         let parts = msg.sentence.split(" ");
         let word_list = parts.collect::<Vec<&str>>();
         
@@ -90,7 +90,6 @@ impl Handler<KeywordAdd> for ActorWCM {
         // println!("KEYWORDADD: {}", key);
         let mut i_pos = 0;
         for (i, word) in word_list.iter().enumerate() {
-            // TODO: cheque sempre lowercase
             if *word.to_lowercase() == key {
                 i_pos = i;
                 break;
