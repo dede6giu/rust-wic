@@ -1,3 +1,4 @@
-brown goes the fox
-the fox jumps a cat
-this is a fox
+Brown goes the fox
+The fox jumps a cat
+The cat is on the brown table
+This is a fox
