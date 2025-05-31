@@ -1,6 +1,6 @@
 use actix::prelude::*;
 use crate::actors::DSM;
-use crate::errors::dsm_error::DSMError;
+use crate::errors::sendkeys_error::SendkeysError;
 use std::collections::HashMap;
 
 #[derive(Clone)]
@@ -69,7 +69,7 @@ impl Handler<Setup> for ActorWCC {
 // - Envia "SendKeys" para DSM
 // - Retorna HashMap pronto
 #[derive(Message)]
-#[rtype(result = "Result<HashMap<String, Vec<String>>, DSMError>")]
+#[rtype(result = "Result<HashMap<String, Vec<String>>, SendkeysError>")]
 pub struct Run { }
 impl Run {
     pub fn new() -> Self {
@@ -77,7 +77,7 @@ impl Run {
     }
 }
 impl Handler<Run> for ActorWCC {
-    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, DSMError>>;
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, SendkeysError>>;
 
     fn handle(&mut self, _msg: Run, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
