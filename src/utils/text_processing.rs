@@ -25,7 +25,7 @@ pub fn extract_sentences(text: &str) -> Vec<String> {
 pub fn extract_stop_words(text: &str) -> std::collections::HashSet<String> {
     let mut stop_words = HashSet::new();
     for word in text.split_whitespace() {
-        stop_words.insert(word.to_string());
+        stop_words.insert(word.to_string().to_lowercase());
     }
     stop_words
 }

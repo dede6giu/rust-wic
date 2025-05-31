@@ -8,6 +8,8 @@ mod actors {
 mod utils;
 mod errors;
 
+use std::collections::HashMap;
+
 use actix::System;
 use actix::Actor;
 use crate::actors::WCC;
@@ -28,8 +30,8 @@ async fn main() {
     // TODO
     // Requisita paths para os arquivos de input e stopword
     // Requisita path para output
-    let path_input = String::new();
-    let path_stopw = String::new();
+    let path_input = "data\\input.txt".to_string();
+    let path_stopw = "data\\stopwords.txt".to_string();
     let path_outpt = String::new();
 
 
@@ -43,11 +45,20 @@ async fn main() {
 
     // Inicia o programa
     let res_run = actor_wcc.send(WCC::Run::new()).await.unwrap();
+    let mut hash_res: HashMap<String, Vec<String>> = HashMap::new();
     match res_run {
-        Ok(_) => println!("Sucesso no Setup!"), // recuperar resultado do hashmap
-        Err(e) => println!("Erro no Setup"),
+        Ok(res_hash) => {
+            println!("Sucesso no Processamento!");
+            hash_res = res_hash;
+        },
+        Err(_) => println!("Erro no Processamento."),
     }
 
+    let res_display = actor_wcc.send(WCC::Display::new(hash_res)).await.unwrap();
+    match res_display {
+        Ok(_) => println!("Sucesso no Print!"),
+        Err(_) => println!("Erro no Processamento."),
+    }
 
     System::current().stop();
 

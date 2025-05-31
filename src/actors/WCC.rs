@@ -90,3 +90,41 @@ impl Handler<Run> for ActorWCC {
         })
     }
 }
+
+
+// ===== Display =====
+// - Envia "SendKeys" para DSM
+// - Retorna HashMap pronto
+#[derive(Message)]
+#[rtype(result = "Result<bool, DSMError>")]
+pub struct Display {
+    words_context: HashMap<String, Vec<String>>
+}
+impl Display {
+    pub fn new(words_context: HashMap<String, Vec<String>>) -> Self {
+        Display {
+            words_context,
+        }
+    }
+}
+impl Handler<Display> for ActorWCC {
+    type Result = Result<bool, DSMError>;
+
+    fn handle(&mut self, msg: Display, _ctx: &mut Context<Self>) -> Self::Result {
+        let pre_keys = msg.words_context.keys();
+        let mut keys: Vec<String> = vec![];
+        for key in pre_keys {
+            keys.push(key.to_string());
+        }
+        keys.sort_unstable();
+        for key in keys {
+            let mut results = msg.words_context.get(&key).unwrap().to_vec();
+            results.sort_unstable();
+            for sentence in results {
+                println!("{}", sentence);
+            }
+        }
+        
+        Ok(true)
+    }
+}

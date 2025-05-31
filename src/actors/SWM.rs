@@ -1,5 +1,6 @@
 use actix::prelude::*;
 use crate::actors::WCM;
+use crate::errors::keyword_add_error::KeywordAddError;
 use crate::utils::text_processing::{extract_stop_words};
 use crate::errors::{filter_error, reqwic_error};
 use std::fs;
@@ -81,7 +82,6 @@ impl Handler<ReqWIC> for ActorSWM {
     fn handle(&mut self, _msg: ReqWIC, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
 
-        // TODO: Processamento de input
         Box::pin(async move {    
             let result_reqwic = this.ref_wcm
                 .send(WCM::ReqWIC::new())
@@ -122,12 +122,16 @@ impl Handler<Filter> for ActorSWM {
 
         Box::pin(async move {
             for word in msg.sentence.split_whitespace() {
-                if !this.stop_words.contains(word) {
-                    this.ref_wcm
-                        .send(WCM::KeywordAdd::new(word.to_string(), Arc::clone(&shared_sentence))) // Envia a palavra e a mesma referência à frase para todas as palavras da frase
-                        .await
+                if !this.stop_words.contains(&word.to_lowercase()) {
+                    // println!("FILTER: {}", word);
+                    let _ = this.ref_wcm
+                            .send(WCM::KeywordAdd::new(word.to_string(), Arc::clone(&shared_sentence))) // Envia a palavra e a mesma referência à frase para todas as palavras da frase
+                            .await;
+
+                        /* Implementação Falha, ajustar
                         .map_err(|_| filter_error::FilterError::SendError)? // Se o send não funcionar, o erro ocorrera aqui (quando fazemos o send)
-                        .map_err(|e| filter_error::FilterError::KeywordAddError(e))?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
+                        .map_err(|e | filter_error::FilterError::KeywordAddError(e))?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
+                        */
                 }
             }
             Ok(true)
