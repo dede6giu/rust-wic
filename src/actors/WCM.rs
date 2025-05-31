@@ -7,12 +7,12 @@ type Db = HashMap<String, Vec<String>>;
 
 #[derive(Clone)]
 pub struct ActorWCM {
-    word_context: Arc<Mutex<Db>>, 
+    word_in_context: Arc<Mutex<Db>>, 
 }
 impl ActorWCM {
     pub fn new() -> Self {
         ActorWCM {
-            word_context: Arc::new(Mutex::new(Db::new())),
+            word_in_context: Arc::new(Mutex::new(Db::new())),
         }
     }
 }
@@ -24,14 +24,14 @@ impl Actor for ActorWCM {
 // - Verifica se o ator está funcionando.
 // - Imprime mensagem no console.
 #[derive(Message)]
-#[rtype(result = "Result<bool, std::io::Error>")]
+#[rtype(result = "bool")]
 pub struct Ping();
 impl Handler<Ping> for ActorWCM {
-    type Result = Result<bool, std::io::Error>;
+    type Result = bool;
 
     fn handle(&mut self, _msg: Ping, _ctx: &mut Context<Self>) -> Self::Result {
         println!("Actor {} ping!", "WCM");
-        Ok(true)
+        true
     }
 }
 
@@ -52,8 +52,11 @@ impl Handler<ReqWIC> for ActorWCM {
         let this = self.clone();
         
         Box::pin(async move {
-            let wic_dict = this.word_context.lock().await.clone();
-            Ok(wic_dict)
+            let guard = this.word_in_context
+            .lock() // Inicia aquisição do lock → Future
+            .await; // Aguarda disponibilidade do lock
+
+            Ok(guard.clone()) // Clona os dados (fora do statement que contém o lock, para evitar o lock travado) e retorna eles no Future
         })
     }
 }
@@ -125,7 +128,7 @@ impl Handler<KeywordAdd> for ActorWCM {
 
         let this = self.clone();
         Box::pin(async move {
-            let mut wic_dict = this.word_context.lock().await;
+            let mut wic_dict = this.word_in_context.lock().await;
             if wic_dict.contains_key(&key) {
                 let mut new_value: Vec<String> = wic_dict.get(&key).unwrap().to_vec();
                 new_value.push(value.to_string());

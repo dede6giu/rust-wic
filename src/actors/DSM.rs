@@ -1,8 +1,7 @@
 use actix::prelude::*;
 use std::fs;
-use crate::errors::dsm_error::DSMError;
+use crate::errors::sendkeys_error::SendkeysError;
 use crate::utils::text_processing::{extract_sentences};
-use crate::errors::{dsm_error};
 use crate::actors::SWM;
 use crate::actors::WCM;
 use std::collections::HashMap;
@@ -86,7 +85,7 @@ impl Handler<Setup> for ActorDSM {
 // - Envia Transmit para SWM (ReqWIC para WCM)
 // - Retorna HashMap pronto
 #[derive(Message)]
-#[rtype(result = "Result<HashMap<String, Vec<String>>, dsm_error::DSMError>")]
+#[rtype(result = "Result<HashMap<String, Vec<String>>, SendkeysError>")]
 pub struct SendKeys { }
 impl SendKeys {
     pub fn new() -> Self {
@@ -94,7 +93,7 @@ impl SendKeys {
     }
 }
 impl Handler<SendKeys> for ActorDSM {
-    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, dsm_error::DSMError>>;
+    type Result = ResponseFuture<Result<HashMap<String, Vec<String>>, SendkeysError>>;
 
     fn handle(&mut self, _msg: SendKeys, _ctx: &mut Context<Self>) -> Self::Result {
         let this = self.clone();
@@ -105,8 +104,8 @@ impl Handler<SendKeys> for ActorDSM {
                 this.ref_swm
                     .send(SWM::Filter::new(sentence)) // Percorrer por referência (com for sentence in &this.sentences) nos obrigaria a enviar `sentence.clone()` para o Filter, pois não poderíamos enviar um valor emprestado no escopo do for (teríamos problema de lifetime). Isso seria mais custoso do que fazer o `move` desses elementos, o que só seria um problema se precisássemos utilizá-los novamente (não precisaremos)
                     .await
-                    .map_err(|_| DSMError::SendError)? // Converte SendError
-                    .map_err(|e| DSMError::FilterError(e))?; // Converte FilterError
+                    .map_err(|_| SendkeysError::SendError)? // Converte SendError
+                    .map_err(|e| SendkeysError::FilterError(e))?; // Converte FilterError
             }
             
             // ISSO AINDA NÃO ESTÁ DEVIDAMENTE IMPLEMENTADO, JOSÉ!!!
@@ -115,8 +114,8 @@ impl Handler<SendKeys> for ActorDSM {
             this.ref_swm
                 .send(SWM::ReqWIC::new())
                 .await
-                .map_err(|_| DSMError::SendError)? // Converte SendError
-                .map_err(|e| DSMError::ReqWICError(e)) // Converte ReqWICError
+                .map_err(|_| SendkeysError::SendError)? // Converte SendError
+                .map_err(|e| SendkeysError::ReqWICError(e)) // Converte ReqWICError
         })
     }
 }

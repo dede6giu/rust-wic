@@ -130,7 +130,7 @@ impl Handler<Filter> for ActorSWM {
 
                         /* Implementação Falha, ajustar
                         .map_err(|_| filter_error::FilterError::SendError)? // Se o send não funcionar, o erro ocorrera aqui (quando fazemos o send)
-                        .map_err(|e | filter_error::FilterError::KeywordAddError(e))?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
+                        .map_err(|e| filter_error::FilterError::KeywordAddError(e))?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
                         */
                 }
             }
