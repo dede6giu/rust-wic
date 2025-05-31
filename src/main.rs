@@ -26,14 +26,9 @@ async fn main() {
     let actor_dsm = DSM::ActorDSM::new(actor_swm).start();
     let actor_wcc = WCC::ActorWCC::new(actor_dsm).start();
     
-    
-    // TODO
-    // Requisita paths para os arquivos de input e stopword
-    // Requisita path para output
     let path_input = "data/input.txt".to_string();
     let path_stopw = "data/stopwords.txt".to_string();
     let path_outpt = String::new();
-
 
     // Inicia cadeia de mensagens de Setup
     let res_setup = actor_wcc.send(WCC::Setup::new(path_input, path_stopw)).await.unwrap();
@@ -54,6 +49,7 @@ async fn main() {
         Err(_) => println!("Erro no Processamento."),
     }
 
+    // Imprime o resultado
     let res_display = actor_wcc.send(WCC::Display::new(hash_res)).await.unwrap();
     match res_display {
         Ok(_) => { /* println!("Sucesso no Print!") */ },
