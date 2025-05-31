@@ -28,3 +28,25 @@ pub fn extract_stop_words(text: &str) -> std::collections::HashSet<String> {
     }
     stop_words
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sentences_basico_com_divisao() {
+        // Entrada: "umaFraseSimples"
+        // Esperado: ["umaFrase", "Simples"]
+        assert_eq!(extract_sentences("umaFraseSimples"), vec!["uma", "Frase", "Simples"]);
+    }
+
+    #[test]
+    fn stopwords_basico_com_conversao_para_minusculas() {
+        // Testa a funcionalidade central de separar palavras por espaço,
+        // convertê-las para minúsculas e inseri-las em um HashSet.
+        let mut esperado = HashSet::new();
+        esperado.insert("palavra1".to_string());
+        esperado.insert("palavra2".to_string());
+        assert_eq!(extract_stop_words("Palavra1 PALAVRA2"), esperado);
+    }
+}
