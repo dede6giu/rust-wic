@@ -30,8 +30,8 @@ async fn main() {
     // TODO
     // Requisita paths para os arquivos de input e stopword
     // Requisita path para output
-    let path_input = "data\\input.txt".to_string();
-    let path_stopw = "data\\stopwords.txt".to_string();
+    let path_input = "data/input.txt".to_string();
+    let path_stopw = "data/stopwords.txt".to_string();
     let path_outpt = String::new();
 
 
