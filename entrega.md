@@ -29,7 +29,7 @@ Este projeto implementa um sistema de Keyword in Context (KWIC) utilizando o mé
 - input padrão:
     - No Meio do Caminho (1928) — Carlos Drummond de Andrade
     - Canção do Exílio (1843) — Gonçalvez Dias
-- stopwords padrão: (fergiemcdowall_stopwords_pt)[https://github.com/stopwords-iso/stopwords-pt/blob/master/raw/fergiemcdowall_stopwords_pt.txt] (adaptado)
+- stopwords padrão: [fergiemcdowall_stopwords_pt]()https://github.com/stopwords-iso/stopwords-pt/blob/master/raw/fergiemcdowall_stopwords_pt.txt) (adaptado)
 
 ### Como compilar e executar o projeto
 ```bash
@@ -41,7 +41,7 @@ cd rust-wic
 cargo run
 ```
 
-### Como excutar os testes
+### Como executar os testes
 ```bash
 cargo test
 ```
