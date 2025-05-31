@@ -13,7 +13,7 @@ Feito isso, use `cargo run` no diretório principal. O resultado irá aparecer n
 
 O resultado estará ordenado em ordem alfabética de keywords, e em seguida ordem alfabética de frases. O uso de reticências `...` indica que palavras foram omitidas na mudança de contexto posterior à palavra para contexto anterior a ela. 
 
-> [!warning] Observação
+> [!WARNING]
 > Ambos os arquivos não aceitam diacríticos nem caracteres especiais. Evite utilizar pontuação.
 
 # Dependências:
