@@ -5,7 +5,7 @@ pub fn extract_sentences(text: &str) -> Vec<String> {
         Some(c) => c.to_string(), // Inicializa a frase com a primeira letra do texto, se houver
         None => return vec![], // Se não houver, a função retorna o vetor vazio
     };
-
+    
     let mut l = 1;
     // Percorre o texto até a próxima letra maiúscula
     for letter in text[1..].chars() {

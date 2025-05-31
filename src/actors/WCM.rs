@@ -82,7 +82,7 @@ impl Handler<KeywordAdd> for ActorWCM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
     fn handle(&mut self, msg: KeywordAdd, _ctx: &mut Context<Self>) -> Self::Result {
-        let SIZE_WIC_AROUND = 2; // Transformar em não-hardcoded eventualmente
+        let SIZE_WIC_AROUND: usize = 2; // Transformar em não-hardcoded eventualmente
         let parts = msg.sentence.split(" ");
         let word_list = parts.collect::<Vec<&str>>();
         
@@ -116,13 +116,79 @@ impl Handler<KeywordAdd> for ActorWCM {
                 result.push_str(word);
                 result.push_str(" ");
             }
-            value = result.to_string();
+            value = result.trim().to_string();
         } else {
-            // Frase maior do que 5 palavras no padrão
+            // Frase maior do que 5 palavras (no padrão)
             // (algumas palavras são excluídas do contexto)
-            // let mut result = "".to_owned();
-            // TODO
-            value = "".to_owned();
+            let mut result = "".to_owned();
+            result.push_str(&msg.key);
+            result.push_str(" ");
+
+            let mut i_bef: isize = i_pos.try_into().unwrap();
+            i_bef -= <usize as TryInto<isize>>::try_into(SIZE_WIC_AROUND).unwrap();
+            let i_aft: usize = i_pos+SIZE_WIC_AROUND;
+            if i_aft < word_list.len() {
+                let mut w_amnt: usize = 0;
+                for (i, word) in word_list.iter().skip(i_pos+1).enumerate() {
+                    if i == i_aft+1 || w_amnt == SIZE_WIC_AROUND {
+                        break;
+                    }
+                    result.push_str(word);
+                    result.push_str(" ");
+                    w_amnt += 1;
+                }
+            } else {
+                let mut w_amnt: usize = 0;
+                
+                for word in word_list.iter().skip(i_pos+1) {
+                    result.push_str(word);
+                    result.push_str(" ");
+                    w_amnt += 1;
+                }
+                
+                for word in word_list.iter() {
+                    if w_amnt == SIZE_WIC_AROUND {
+                        break;
+                    }
+                    result.push_str(word);
+                    result.push_str(" ");
+                    w_amnt += 1;
+                }
+
+            }
+            result = result.trim().to_string();
+            result.push_str(" ... ");
+
+            if i_bef >= 0 {
+                let mut w_amnt: usize = 0;
+                for (i, word) in word_list.iter().skip(i_bef.try_into().unwrap()).enumerate() {
+                    if i == i_pos || w_amnt == SIZE_WIC_AROUND {
+                        break;
+                    }
+                    result.push_str(word);
+                    result.push_str(" ");
+                    w_amnt += 1;
+                }
+            } else {
+                let mut w_amnt: usize = 0;
+                let end_skip = word_list.len() - <isize as TryInto<usize>>::try_into(i_bef.abs()).unwrap();
+
+                for word in word_list.iter().skip(end_skip) {
+                    result.push_str(word);
+                    result.push_str(" ");
+                    w_amnt += 1;
+                }
+                for (i, word) in word_list.iter().enumerate() {
+                    if i == i_pos || w_amnt == SIZE_WIC_AROUND {
+                        break;
+                    }
+                    result.push_str(word);
+                    result.push_str(" ");
+                    w_amnt += 1;
+                }
+            }
+
+            value = result.trim().to_string();
         }
         // println!("VALUE: {}", value);
 

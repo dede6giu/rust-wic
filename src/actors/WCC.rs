@@ -119,7 +119,9 @@ impl Handler<Display> for ActorWCC {
         keys.sort_unstable();
         for key in keys {
             let mut results = msg.words_context.get(&key).unwrap().to_vec();
-            results.sort_unstable();
+            // ordena independente de maiúscula / minúscula
+            // sem alterar string original 
+            results.sort_by(|a, b| (a.to_lowercase()).cmp(&b.to_lowercase()));
             for sentence in results {
                 println!("{}", sentence);
             }

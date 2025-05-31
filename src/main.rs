@@ -38,7 +38,7 @@ async fn main() {
     // Inicia cadeia de mensagens de Setup
     let res_setup = actor_wcc.send(WCC::Setup::new(path_input, path_stopw)).await.unwrap();
     match res_setup {
-        Ok(_) => println!("Sucesso no Setup!"),
+        Ok(_) => { /* println!("Sucesso no Setup!") */ },
         Err(e) => println!("Erro no Setup: {}", e),
     }
 
@@ -48,7 +48,7 @@ async fn main() {
     let mut hash_res: HashMap<String, Vec<String>> = HashMap::new();
     match res_run {
         Ok(res_hash) => {
-            println!("Sucesso no Processamento!");
+            // println!("Sucesso no Processamento!");
             hash_res = res_hash;
         },
         Err(_) => println!("Erro no Processamento."),
@@ -56,7 +56,7 @@ async fn main() {
 
     let res_display = actor_wcc.send(WCC::Display::new(hash_res)).await.unwrap();
     match res_display {
-        Ok(_) => println!("Sucesso no Print!"),
+        Ok(_) => { /* println!("Sucesso no Print!") */ },
         Err(_) => println!("Erro no Processamento."),
     }
 
