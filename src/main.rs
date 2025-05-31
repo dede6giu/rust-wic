@@ -30,15 +30,12 @@ async fn main() {
     let path_stopw = "data/stopwords.txt".to_string();
     let path_outpt = String::new();
 
-    // Inicia cadeia de mensagens de Setup
     let res_setup = actor_wcc.send(WCC::Setup::new(path_input, path_stopw)).await.unwrap();
     match res_setup {
         Ok(_) => { /* println!("Sucesso no Setup!") */ },
         Err(e) => println!("Erro no Setup: {}", e),
     }
 
-
-    // Inicia o programa
     let res_run = actor_wcc.send(WCC::Run::new()).await.unwrap();
     let mut hash_res: HashMap<String, Vec<String>> = HashMap::new();
     match res_run {
@@ -49,7 +46,6 @@ async fn main() {
         Err(_) => println!("Erro no Processamento."),
     }
 
-    // Imprime o resultado
     let res_display = actor_wcc.send(WCC::Display::new(hash_res)).await.unwrap();
     match res_display {
         Ok(_) => { /* println!("Sucesso no Print!") */ },
