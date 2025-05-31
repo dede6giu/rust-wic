@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+use crate::utils::text_processing::make_circular_sentence;
+
 type Db = HashMap<String, Vec<String>>;
 
 #[derive(Clone)]
@@ -82,56 +84,16 @@ impl Handler<KeywordAdd> for ActorWCM {
     type Result = ResponseFuture<Result<bool, std::io::Error>>;
 
     fn handle(&mut self, msg: KeywordAdd, _ctx: &mut Context<Self>) -> Self::Result {
-        let SIZE_WIC_AROUND = 2; // Transformar em não-hardcoded eventualmente
-        let parts = msg.sentence.split(" ");
-        let word_list = parts.collect::<Vec<&str>>();
-        
-        let key: String = msg.key.clone().to_lowercase();
-        // println!("KEYWORDADD: {}", key);
-        let mut i_pos = 0;
-        for (i, word) in word_list.iter().enumerate() {
-            // TODO: cheque sempre lowercase
-            if *word.to_lowercase() == key {
-                i_pos = i;
-                break;
-            }
-        }
+        let words: Vec<&str> = msg.sentence.split_whitespace().collect();
+        let key = msg.key.to_lowercase();
 
-        let value: String;
-        if word_list.len() <= SIZE_WIC_AROUND*2 + 1 {
-            // Todas palavras são inlusas, a frase
-            // original é muito pequena (5 ou menos
-            // palavras no caso padrão)
-            let mut result = "".to_owned();
-            result.push_str(&msg.key);
-            result.push_str(" ");
-            for word in word_list.iter().skip(i_pos+1) {
-                result.push_str(word);
-                result.push_str(" ");
-            }
-            for word in word_list.iter() {
-                if word.to_lowercase() == key {
-                    break;
-                }
-                result.push_str(word);
-                result.push_str(" ");
-            }
-            value = result.to_string();
-        } else {
-            // Frase maior do que 5 palavras no padrão
-            // (algumas palavras são excluídas do contexto)
-            // let mut result = "".to_owned();
-            // TODO
-            value = "".to_owned();
-        }
-        // println!("VALUE: {}", value);
-
+        let circular_sentence = make_circular_sentence(&key, &words);
         let this = self.clone();
         Box::pin(async move {
             let mut wic_dict = this.word_in_context.lock().await;
             if wic_dict.contains_key(&key) {
                 let mut new_value: Vec<String> = wic_dict.get(&key).unwrap().to_vec();
-                new_value.push(value.to_string());
+                new_value.push(circular_sentence.to_string());
                 
                 // debug
                 // for deb in new_value.iter() {
@@ -142,7 +104,7 @@ impl Handler<KeywordAdd> for ActorWCM {
 
             } else {
                 let mut new_value: Vec<String> = Vec::new();
-                new_value.push(value.to_string());
+                new_value.push(circular_sentence.to_string());
                 
                 // debug
                 // for deb in new_value.iter() {

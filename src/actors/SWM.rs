@@ -1,5 +1,6 @@
 use actix::prelude::*;
 use crate::actors::WCM;
+use crate::errors::filter_error::FilterError;
 use crate::errors::keyword_add_error::KeywordAddError;
 use crate::utils::text_processing::{extract_stop_words};
 use crate::errors::{filter_error, reqwic_error};
