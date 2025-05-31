@@ -1,3 +1,4 @@
+#![allow(warnings)]
 mod actors {
     pub mod UT;
     pub mod WCC;
