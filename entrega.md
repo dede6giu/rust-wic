@@ -12,7 +12,7 @@ Este projeto implementa um sistema de Keyword in Context (KWIC) utilizando o mé
 
 ## Estilo e Linguagem de Programação
 - **Estilo:** Actors
-- **Linguagem:** Rust + Framework `actix`
+- **Linguagem:** Rust
 
 ## Links Importantes
 - **Repositório no GitHub:** [https://github.com/dede6giu/rust-wic](https://github.com/dede6giu/rust-wic)
@@ -26,6 +26,10 @@ Este projeto implementa um sistema de Keyword in Context (KWIC) utilizando o mé
 - cargo: "1.87.0"
     - actix: "0.13.5"
     - tokio: "1.45.1"
+- input padrão:
+    - No Meio do Caminho (1928) — Carlos Drummond de Andrade
+    - Canção do Exílio (1843) — Gonçalvez Dias
+- stopwords padrão: (fergiemcdowall_stopwords_pt)[https://github.com/stopwords-iso/stopwords-pt/blob/master/raw/fergiemcdowall_stopwords_pt.txt] (adaptado)
 
 ### Como compilar e executar o projeto
 ```bash
