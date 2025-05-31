@@ -96,7 +96,7 @@ impl Handler<Run> for ActorWCC {
 // - Envia "SendKeys" para DSM
 // - Retorna HashMap pronto
 #[derive(Message)]
-#[rtype(result = "Result<bool, DSMError>")]
+#[rtype(result = "Result<bool, std::io::Error>")]
 pub struct Display {
     words_context: HashMap<String, Vec<String>>
 }
@@ -108,7 +108,7 @@ impl Display {
     }
 }
 impl Handler<Display> for ActorWCC {
-    type Result = Result<bool, DSMError>;
+    type Result = Result<bool, std::io::Error>;
 
     fn handle(&mut self, msg: Display, _ctx: &mut Context<Self>) -> Self::Result {
         let pre_keys = msg.words_context.keys();
