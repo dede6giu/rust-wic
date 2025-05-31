@@ -127,7 +127,7 @@ impl Handler<Filter> for ActorSWM {
                         .send(WCM::KeywordAdd::new(word.to_string(), Arc::clone(&shared_sentence))) // Envia a palavra e a mesma referência à frase para todas as palavras da frase
                         .await
                         .map_err(|_| filter_error::FilterError::SendError)? // Se o send não funcionar, o erro ocorrera aqui (quando fazemos o send)
-                        .map_err(|_| filter_error::FilterError::KeywordAddError)?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
+                        .map_err(|e| filter_error::FilterError::KeywordAddError(e))?; // Se o KeywordAdd não funcionar, o resultado de todas as operações anteriores será um Err(). Nesse caso, fazemos o map desse erro para um FilterError
                 }
             }
             Ok(true)
