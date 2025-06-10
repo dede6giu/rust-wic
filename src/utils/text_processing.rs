@@ -54,7 +54,7 @@ pub fn make_circular_sentence(key: &str, words: &Vec<&str>) -> String {
 
         let additional_needed = SIZE_WIC_AROUND - (keyword_pos - start_index);
 
-        let avaiable_from_end = (size - (keyword_pos + SIZE_WIC_AROUND + 1)).saturating_sub(0); // Conta todas as palavras disponíveis no final do vetor, retirando as que são consumidas pela extensão após a keyword
+        let avaiable_from_end = size.saturating_sub(keyword_pos + 3); // Conta todas as palavras disponíveis no final do vetor, retirando as que são consumidas pela extensão após a keyword
 
         let take_from_end = additional_needed.min(avaiable_from_end);
 
@@ -85,7 +85,7 @@ pub fn make_circular_sentence(key: &str, words: &Vec<&str>) -> String {
         let additional_needed = SIZE_WIC_AROUND - available_after;
         
         // 3. Pega palavras do início, evitando as já usadas no contexto anterior
-        let available_from_start = start_index.saturating_sub(0); // Todas as palavras antes de start_index
+        let available_from_start = start_index; // Todas as palavras antes de start_index (que é o próprio star_index, obviamente)
         let take_from_start = additional_needed.min(available_from_start); // Pega o mínimo entre as palavras adicionais necessárias e as disponíveis no início, que são as primeiras palavras da string que já não foram pegas
         
         // 4. Adiciona palavras do início (se disponíveis)
